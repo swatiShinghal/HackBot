@@ -76,7 +76,6 @@ public class DBHelper extends SQLiteOpenHelper
     public HackBotEvent getData(long time, long range){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.query(EVENTS_TABLE_NAME, null, " BETWEEN ? AND ?", new String[] {Long.toString(time - range), Long.toString(time + range)}, null, null, null, null);
-        res.moveToFirst() ;
         HackBotEvent event = parseRecord(res);
         //Cursor res =  db.rawQuery( "select * from HackBotEvents where id="+id+" AND time="+time+"", null );
 
@@ -86,7 +85,6 @@ public class DBHelper extends SQLiteOpenHelper
     public HackBotEvent getData(long id, long time, long range){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res = db.query(EVENTS_TABLE_NAME, null, EVENTS_ID+ "? AND "+EVENTS_COLUMN_TIME_TO_TRIGGER+" BETWEEN ? AND ?", new String[] {Long.toString(id), Long.toString(time - range), Long.toString(time + range)}, null, null, null, null);
-        res.moveToFirst() ;
         HackBotEvent event = parseRecord(res);
         //Cursor res =  db.rawQuery( "select * from HackBotEvents where id="+id+" AND time="+time+"", null );
 
@@ -102,6 +100,7 @@ public class DBHelper extends SQLiteOpenHelper
         Time last = new Time();
         last.setToNow();
         HackBotEvent event = getData(id, time, range);
+        if (event == null) return  false;
         String pattern = event.getPattern();
         long noOfDays = getNoOfDays(last.toMillis(false), event.getFirstOccurrence());
         long updatedPattern = getUpdatedPattern(pattern, noOfDays);
@@ -121,15 +120,31 @@ public class DBHelper extends SQLiteOpenHelper
         return true;
     }
 
-    public boolean updateEvent (long id, long time, long range, long duration)
+    public boolean updateDurationEvent (long id, long range)
     {
-
+        Time finish = new Time();
+        finish.setToNow();
+        long finishTime = (finish.hour * 60)+finish.minute;
         SQLiteDatabase db = this.getWritableDatabase();
+        HackBotEvent event = getNearestRecord(id, finishTime);
+        if (event == null) return false;
+        long time = event.getTimeToTrigger();
+        long duration = finishTime - time;
         ContentValues contentValues = new ContentValues();
         contentValues.put(EVENTS_ID, id);
         contentValues.put(EVENTS_COLUMN_DURATION, duration);
         db.update(EVENTS_TABLE_NAME, contentValues, EVENTS_ID +"? AND "+EVENTS_COLUMN_TIME_TO_TRIGGER+" BETWEEN ? AND ?", new String[] {Long.toString(id), Long.toString(time - range), Long.toString(time + range)} );
         return true;
+    }
+
+    private HackBotEvent getNearestRecord(long id, long time)
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(EVENTS_TABLE_NAME, null,
+                EVENTS_ID+ "?", new String[] {Long.toString(id)}, null, null,
+                "abs(EVENTS_COLUMN_TIME_TO_TRIGGER - " + time + ")", "1");
+        HackBotEvent event = parseRecord(cursor);
+        return event;
     }
 
 
@@ -142,23 +157,26 @@ public class DBHelper extends SQLiteOpenHelper
 
     private HackBotEvent parseRecord(Cursor cursor)
     {
-        HackBotEvent event= new HackBotEvent();
-        event.setEventId(cursor.getInt(0));
-        event.setEventName(cursor.getString(1));
-        event.setTimeToTrigger(cursor.getInt(2));
-        event.setFirstOccurrence(cursor.getInt(3));
-        event.setLastOccurrence(cursor.getInt(4));
-        event.setTimesOccurred(cursor.getInt(5));
-        event.setProbability(cursor.getInt(6));
-        event.setDuration(cursor.getInt(7));
-        event.setPattern(Long.toBinaryString(cursor.getInt(8)));
-        String repWeek = cursor.getString(9);
-        if(repWeek.equals("false"))
-            event.setRepeatedWeekly(false);
-        else
-           event.setRepeatedWeekly(true);
-        event.setRepeatInDays(cursor.getInt(10));
-        return event;
+        if (cursor.moveToFirst()) {
+            HackBotEvent event = new HackBotEvent();
+            event.setEventId(cursor.getInt(0));
+            event.setEventName(cursor.getString(1));
+            event.setTimeToTrigger(cursor.getInt(2));
+            event.setFirstOccurrence(cursor.getInt(3));
+            event.setLastOccurrence(cursor.getInt(4));
+            event.setTimesOccurred(cursor.getInt(5));
+            event.setProbability(cursor.getInt(6));
+            event.setDuration(cursor.getInt(7));
+            event.setPattern(Long.toBinaryString(cursor.getInt(8)));
+            String repWeek = cursor.getString(9);
+            if (repWeek.equals("false"))
+                event.setRepeatedWeekly(false);
+            else
+                event.setRepeatedWeekly(true);
+            event.setRepeatInDays(cursor.getInt(10));
+            return event;
+        }
+        return null;
     }
 
     private long getUpdatedPattern(String pattern, long num)
@@ -166,7 +184,7 @@ public class DBHelper extends SQLiteOpenHelper
         long finalPattern = Long.parseLong(pattern, 2);
         if (num <= 7) {
             long patternInt = Long.parseLong(pattern, 2);
-            finalPattern = patternInt | (10 * num);
+            finalPattern = patternInt | (2 ^ (6-num));
         }
         return finalPattern;
     }
