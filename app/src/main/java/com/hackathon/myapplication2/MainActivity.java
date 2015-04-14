@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.hackathon.myapplication2.com.hackathon.myapplication2.service.ActionService;
 import com.hackathon.myapplication2.com.hackathon.myapplication2.service.ListenerService;
 
 
@@ -43,7 +44,8 @@ public class MainActivity extends ActionBarActivity {
 
     // Method to start the service
     public void startService(View view) {
-        startService(new Intent(getBaseContext(), ListenerService.class));
+        //startService(new Intent(getBaseContext(), ListenerService.class));
+        startService(new Intent(getBaseContext(), ActionService.class));
     }
 
     // Method to stop the service
