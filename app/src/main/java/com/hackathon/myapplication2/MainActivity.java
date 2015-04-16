@@ -1,23 +1,28 @@
 package com.hackathon.myapplication2;
 
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import com.hackathon.myapplication2.com.hackathon.myapplication2.service.ActionService;
 import com.hackathon.myapplication2.com.hackathon.myapplication2.service.ListenerService;
+import com.hackathon.myapplication2.com.hackathon.myapplication2.service.ReciverClass;
 import com.hackathon.myapplication2.db.DBHelper;
 
 
 public class MainActivity extends ActionBarActivity {
 
-    private DBHelper dbHelper;
+    private ReciverClass myReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dbHelper = new DBHelper(this);
 
         setContentView(R.layout.activity_main);
     }
@@ -47,16 +52,14 @@ public class MainActivity extends ActionBarActivity {
 
     // Method to start the service
     public void startService(View view) {
-        Intent i = new Intent();
-        Bundle b = new Bundle();
-       // b.putParcelable("DBHelper", dbHelper);
-        i.putExtras(b);
-        Intent intent = new Intent(getBaseContext(), ListenerService.class);
-        startService(intent);
+        startService(new Intent(getBaseContext(), ListenerService.class));
+        startService(new Intent(getBaseContext(), ActionService.class));
+
     }
 
     // Method to stop the service
     public void stopService(View view) {
         stopService(new Intent(getBaseContext(), ListenerService.class));
+        stopService(new Intent(getBaseContext(), ActionService.class));
     }
 }

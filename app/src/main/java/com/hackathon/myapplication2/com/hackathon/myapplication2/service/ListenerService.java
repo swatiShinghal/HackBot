@@ -16,17 +16,18 @@ import com.hackathon.myapplication2.db.DBHelper;
 public class ListenerService extends Service
 {
     private ReciverClass myReceiver;
+    private DBHelper dbHelper;
     @Override
     public void onCreate()
     {
-
+        dbHelper = new DBHelper(this);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         // Let it continue running until it is stopped.
-        //dbHelper = new DBHelper(intent.)
+
         Toast.makeText(this, "Service Started", Toast.LENGTH_LONG).show();
         /*IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
 
