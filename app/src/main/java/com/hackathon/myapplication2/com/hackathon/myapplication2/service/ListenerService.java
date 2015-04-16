@@ -29,10 +29,7 @@ public class ListenerService extends Service
         // Let it continue running until it is stopped.
 
         Toast.makeText(this, "Service Started", Toast.LENGTH_LONG).show();
-        /*IntentFilter filter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
 
-        ReciverClass myReceiver = new ReciverClass();
-        registerReceiver(myReceiver, filter);*/
         IntentFilter filter1=new IntentFilter(
                 AudioManager.RINGER_MODE_CHANGED_ACTION);
         IntentFilter filter2 = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
