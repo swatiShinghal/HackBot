@@ -8,13 +8,17 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.hackathon.myapplication2.com.hackathon.myapplication2.service.ListenerService;
+import com.hackathon.myapplication2.db.DBHelper;
 
 
 public class MainActivity extends ActionBarActivity {
 
+    private DBHelper dbHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        dbHelper = new DBHelper(this);
+
         setContentView(R.layout.activity_main);
     }
 
@@ -43,7 +47,12 @@ public class MainActivity extends ActionBarActivity {
 
     // Method to start the service
     public void startService(View view) {
-        startService(new Intent(getBaseContext(), ListenerService.class));
+        Intent i = new Intent();
+        Bundle b = new Bundle();
+       // b.putParcelable("DBHelper", dbHelper);
+        i.putExtras(b);
+        Intent intent = new Intent(getBaseContext(), ListenerService.class);
+        startService(intent);
     }
 
     // Method to stop the service
