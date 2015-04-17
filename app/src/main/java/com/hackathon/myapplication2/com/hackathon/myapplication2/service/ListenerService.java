@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -17,6 +18,14 @@ public class ListenerService extends Service
 {
     private ReciverClass myReceiver;
     private DBHelper dbHelper;
+    private final IBinder mBinder = new LocalBinder();
+
+    public class LocalBinder extends Binder {
+        ListenerService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return ListenerService.this;
+        }
+    }
     @Override
     public void onCreate()
     {
@@ -48,7 +57,7 @@ public class ListenerService extends Service
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
     }
 
     @Override
@@ -59,5 +68,10 @@ public class ListenerService extends Service
      @Override
     public void onRebind(Intent intent) {
 
+    }
+
+    public void setNumber(int num)
+    {
+        Toast.makeText(this, "Service Set Number :"+num, Toast.LENGTH_LONG).show();
     }
 }

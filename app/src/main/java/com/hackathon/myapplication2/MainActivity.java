@@ -14,12 +14,14 @@ import android.widget.Toast;
 import com.hackathon.myapplication2.com.hackathon.myapplication2.service.ActionService;
 import com.hackathon.myapplication2.com.hackathon.myapplication2.service.ListenerService;
 import com.hackathon.myapplication2.com.hackathon.myapplication2.service.ReciverClass;
+import com.hackathon.myapplication2.com.hackathon.myapplication2.service.UIClass;
 import com.hackathon.myapplication2.db.DBHelper;
 
 
 public class MainActivity extends ActionBarActivity {
 
     private ReciverClass myReceiver;
+    private UIClass ui;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +54,8 @@ public class MainActivity extends ActionBarActivity {
 
     // Method to start the service
     public void startService(View view) {
+        ui = new UIClass(getBaseContext());
+        ui.onStart();
         startService(new Intent(getBaseContext(), ListenerService.class));
         startService(new Intent(getBaseContext(), ActionService.class));
 
@@ -61,5 +65,10 @@ public class MainActivity extends ActionBarActivity {
     public void stopService(View view) {
         stopService(new Intent(getBaseContext(), ListenerService.class));
         stopService(new Intent(getBaseContext(), ActionService.class));
+    }
+
+    public void bindService(View view)
+    {
+        ui.setNumber();
     }
 }
